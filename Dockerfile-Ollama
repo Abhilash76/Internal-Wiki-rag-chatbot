@@ -1,0 +1,11 @@
+FROM ollama/ollama
+
+COPY pull-ollama.sh /tmp/pull-ollama.sh
+
+WORKDIR /tmp
+
+RUN chmod +x pull-ollama.sh
+
+EXPOSE 11434
+
+ENTRYPOINT ["/bin/sh", "/tmp/pull-ollama.sh"]

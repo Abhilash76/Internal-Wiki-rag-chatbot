@@ -1,0 +1,43 @@
+
+services:
+  chatbot-service:
+    image: chatbot:latest  # Replace with the actual image name
+    container_name: chatbot-container
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+#      - FLASK_APP=vector_api.py
+#      - STREAMLIT_SERVER_PORT=8501
+#      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    expose:
+      - 8080/tcp
+    ports:
+      - "8501:8501"  # Streamlit App Maps localhost:8501 to the container's 8501 port
+      - "5000:5000" # Flask
+    restart: always  # Always restart the container
+    networks:
+      - chatbot-net
+
+  ollama:
+    build:
+      context: .
+      dockerfile: ./Dockerfile-Ollama
+    container_name: ollama-container
+    restart: always
+    expose:
+      - 11434/tcp
+    ports:
+      - "11434:11434/tcp"
+    healthcheck:
+      test: ollama --version  || exit 1
+    volumes:
+      - ollama_volume:/root/.ollama
+    networks:
+      - chatbot-net
+
+volumes:
+  ollama_volume:
+    driver: local
+
+networks:
+  chatbot-net:
+    driver: bridge

@@ -1,0 +1,42 @@
+trigger: none
+
+resources:
+  repositories:
+    - repository: templates
+      name: Rymax-One/ci-templates
+      type: git
+
+pool:
+  vmImage: "ubuntu-latest"
+
+parameters:
+  - name: build_image
+    displayName: "Build container image"
+    type: boolean
+    default: true
+  - name: push_ecr
+    displayName: "Push container image to ECR"
+    type: boolean
+    default: true
+
+variables:
+  - name: imageName
+    value: "rag-chatbot"
+
+stages:
+  - stage: "build"
+    displayName: "Build"
+    jobs:
+      - job: "build"
+        displayName: "Build Docker image"
+        steps:
+          - checkout: self
+          - ${{ if eq(parameters.build_image, true) }}:
+              - template: templates/docker-build.yaml@templates
+                parameters:
+                  imageName: $(imageName)
+          - ${{ if eq(parameters.push_ecr, true) }}:
+              - template: templates/push-to-ecr.yaml@templates
+                parameters:
+                  imageName: $(imageName)
+                  repository: $(imageName)
